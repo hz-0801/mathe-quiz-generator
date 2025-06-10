@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathe-Quiz aus QR starten</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; max-width: 600px; margin: auto; }
+    .question { margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .option { display: block; margin-top: 10px; padding: 10px; background: #eee; border-radius: 6px; border: none; width: 100%; text-align: left; }
+    .option.selected { background: #007bff; color: white; font-weight: bold; }
+    #status { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Mathe-Quiz</h2>
+  <div id="quiz"></div>
+  <div id="status"></div>
+
+  <script>
+    const quizDataRaw = decodeURIComponent(escape(atob(location.hash.slice(1))));
+    const quizData = JSON.parse(quizDataRaw);
+    const quizDiv = document.getElementById('quiz');
+    const status = document.getElementById('status');
+
+    let userAnswers = {};
+
+    quizData.questions.forEach((entry, i) => {
+      const block = document.createElement('div');
+      block.className = 'question';
+      block.innerHTML = `<p>${i+1}. Was ist ${entry.q}?</p>`;
+      entry.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = opt;
+        btn.onclick = () => {
+          userAnswers[i] = opt;
+          block.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          updateStatus();
+        };
+        block.appendChild(btn);
+      });
+      quizDiv.appendChild(block);
+    });
+
+    function updateStatus() {
+      let correct = 0;
+      quizData.questions.forEach((q, i) => {
+        if (userAnswers[i] == q.correct) correct++;
+      });
+      status.textContent = `Richtig: ${correct} von ${quizData.questions.length}`;
+    }
+  </script>
+</body>
+</html>
